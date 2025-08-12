@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calculadora (Frontend)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: '#0b0b0c',
+              foreground: '#e6e6e6',
+              muted: '#1a1b1e',
+              border: '#2a2b2e'
+            }
+          }
+        },
+        darkMode: 'class'
+      }
+    </script>
+    <link rel="icon" href="data:," />
+  </head>
+  <body class="min-h-screen bg-background text-foreground antialiased">
+    <div class="max-w-5xl mx-auto p-6">
+      <h1 class="text-2xl font-semibold mb-4">Calculadora</h1>
+      <div id="root"></div>
+    </div>
+
+    <!-- React 18 + ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel para suportar JSX em desenvolvimento local -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- math.js para avaliar expressões -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11/lib/browser/math.js"></script>
+
+    <!-- App -->
+    <script type="text/babel">
+      const { useState } = React;
+
+      function Calculator({ display = '0', onButtonClick = () => {}, className = '' }) {
+        return (
+          <div className={`w-full max-w-sm mx-auto bg-background border border-border rounded-lg shadow-lg p-4 ${className}`}>
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="text-right text-2xl font-mono text-foreground min-h-[2rem] overflow-hidden" aria-live="polite">
+                {display}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              <button onClick={() => onButtonClick('clear')} className="col-span-2 h-12 rounded-md bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors duration-200 active:scale-95">C</button>
+              <button onClick={() => onButtonClick('backspace')} className="h-12 rounded-md bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors duration-200 active:scale-95">⌫</button>
+              <button onClick={() => onButtonClick('/')} className="h-12 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors duration-200 active:scale-95">÷</button>
+
+              <button onClick={() => onButtonClick('7')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">7</button>
+              <button onClick={() => onButtonClick('8')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">8</button>
+              <button onClick={() => onButtonClick('9')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">9</button>
+              <button onClick={() => onButtonClick('*')} className="h-12 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors duration-200 active:scale-95">×</button>
+
+              <button onClick={() => onButtonClick('4')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">4</button>
+              <button onClick={() => onButtonClick('5')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">5</button>
+              <button onClick={() => onButtonClick('6')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">6</button>
+              <button onClick={() => onButtonClick('-')} className="h-12 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors duration-200 active:scale-95">-</button>
+
+              <button onClick={() => onButtonClick('1')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">1</button>
+              <button onClick={() => onButtonClick('2')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">2</button>
+              <button onClick={() => onButtonClick('3')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">3</button>
+              <button onClick={() => onButtonClick('+')} className="h-24 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors duration-200 active:scale-95 row-span-2">+</button>
+
+              <button onClick={() => onButtonClick('0')} className="col-span-2 h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">0</button>
+              <button onClick={() => onButtonClick('.')} className="h-12 rounded-md bg-muted hover:bg-muted/80 text-foreground font-semibold transition-colors duration-200 active:scale-95">.</button>
+
+              <button onClick={() => onButtonClick('=')} className="col-span-4 h-12 rounded-md bg-green-500 hover:bg-green-600 text-white font-semibold transition-colors duration-200 active:scale-95">=</button>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [display, setDisplay] = useState('0');
+
+        const handleButtonClick = (value) => {
+          if (value === 'clear') {
+            setDisplay('0');
+            return;
+          }
+          if (value === 'backspace') {
+            setDisplay((prev) => {
+              const next = prev.length > 1 ? prev.slice(0, -1) : '0';
+              return next;
+            });
+            return;
+          }
+          if (value === '=') {
+            try {
+              // Normaliza símbolos para math.js
+              const expr = display.replace(/×/g, '*').replace(/÷/g, '/');
+              const result = math.evaluate(expr);
+              setDisplay(String(result));
+            } catch (e) {
+              setDisplay('Erro');
+            }
+            return;
+          }
+          // Concatenação de dígitos e operadores
+          setDisplay((prev) => (prev === '0' && /[0-9.]/.test(value) ? value : prev + value));
+        };
+
+        return (
+          <div className="py-6">
+            <Calculator display={display} onButtonClick={handleButtonClick} />
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
+  </html>
+
+
