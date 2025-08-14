@@ -1,36 +1,44 @@
-## Calculadora em Python (CLI e GUI)
+# Projetos de Calculadora
 
-### Como executar
+Este repositório contém diferentes implementações de uma calculadora com funcionalidades avançadas.
 
-- CLI passo-a-passo (padrão):
+## Estrutura do Projeto
 
-```bash
-python main.py
+```
+/
+├── calculadora-python/     # Implementação em Python (CLI + GUI)
+│   ├── calculator_core.py
+│   ├── cli_calculator.py
+│   ├── gui_calculator.py
+│   ├── main.py
+│   └── README.md
+├── web-calculator/         # Implementação Web (HTML/CSS/JS)
+│   ├── index.html
+│   └── README.md
+└── README.md              # Este arquivo
 ```
 
-- CLI por expressão (como antes):
+## Projetos Disponíveis
 
-```bash
-python main.py --expressao
-```
+### 🐍 [Calculadora Python](./calculadora-python/)
+- Interface CLI interativa e por expressão
+- Interface GUI com Tkinter
+- Operações avançadas: potência, raiz quadrada, parênteses
+- Avaliação segura sem `eval()`
 
-- GUI (Tkinter):
+### 🌐 [Calculadora Web](./web-calculator/)
+- Interface web moderna e responsiva
+- Funcionalidades equivalentes à versão Python
+- Executa diretamente no navegador
 
-```bash
-python main.py --gui
-```
+## Funcionalidades Gerais
 
-### Funcionalidades
+- Operações básicas: `+`, `-`, `*`, `/`
+- Potência: `**` ou `^`
+- Raiz quadrada: `sqrt(x)`
+- Suporte a parênteses para precedência
+- Avaliação matemática segura
 
-- Operações: `+`, `-`, `*`, `/`, potência (`**` ou `^`), parênteses
-- Função: `sqrt(x)`
-- Avaliação segura via AST (sem `eval`)
+## Como começar
 
-### Exemplos
-
-```text
-> (2+3)^2
-25
-> sqrt(9) + 1/4
-3.25
-```
+Escolha o projeto que mais te interessa e siga as instruções no README específico de cada pasta.
