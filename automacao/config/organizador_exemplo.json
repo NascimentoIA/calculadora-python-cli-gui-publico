@@ -1,0 +1,16 @@
+{
+  "mapeamento_extensoes": {
+    "imagens": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"],
+    "documentos": [".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt", ".pages"],
+    "planilhas": [".xls", ".xlsx", ".csv", ".ods", ".numbers"],
+    "apresentacoes": [".ppt", ".pptx", ".odp", ".key"],
+    "videos": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"],
+    "audios": [".mp3", ".wav", ".flac", ".aac", ".ogg", ".wma", ".m4a"],
+    "compactados": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz"],
+    "executaveis": [".exe", ".msi", ".deb", ".rpm", ".dmg", ".app", ".pkg"],
+    "codigo": [".py", ".js", ".html", ".css", ".java", ".cpp", ".c", ".php", ".rb", ".go", ".rs"],
+    "ebooks": [".epub", ".mobi", ".azw", ".azw3", ".fb2"],
+    "fontes": [".ttf", ".otf", ".woff", ".woff2", ".eot"],
+    "design": [".psd", ".ai", ".sketch", ".fig", ".xd", ".indd"]
+  }
+}
