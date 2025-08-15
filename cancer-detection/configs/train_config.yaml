@@ -1,0 +1,137 @@
+# Configuração de Treinamento - Detecção de Câncer de Pele
+# DermAI - Sistema de Detecção de Câncer de Pele
+
+# Configurações de dados
+data:
+  data_dir: "../data/processed"           # Diretório com dados processados
+  image_size: 224                         # Tamanho das imagens (224x224)
+  batch_size: 32                          # Tamanho do batch (ajustar conforme GPU)
+  num_workers: 4                          # Workers para DataLoader
+  test_size: 0.2                          # 20% para teste
+  val_size: 0.1                           # 10% para validação (do restante)
+  
+# Configurações do modelo
+model:
+  num_classes: 7                          # Número de classes de lesões
+  architecture: "efficientnet_b4"         # Arquitetura base (EfficientNet-B4)
+  pretrained: true                        # Usar pesos pré-treinados do ImageNet
+  dropout_rate: 0.3                       # Taxa de dropout para regularização
+  freeze_backbone: false                  # Não congelar backbone (fine-tuning completo)
+
+# Configurações de treinamento
+training:
+  epochs: 100                             # Número de épocas
+  
+  # Otimizador
+  optimizer:
+    type: "adamw"                         # AdamW (melhor para transformers)
+    lr: 1e-3                              # Learning rate inicial
+    weight_decay: 1e-4                    # Regularização L2
+    betas: [0.9, 0.999]                   # Betas do Adam
+  
+  # Scheduler de learning rate
+  scheduler:
+    type: "cosine"                        # Cosine annealing
+    min_lr: 1e-6                          # LR mínimo
+  
+  # Função de loss
+  loss:
+    type: "focal_loss"                    # Focal Loss para classes desbalanceadas
+    alpha: 1.0                            # Fator de balanceamento
+    gamma: 2.0                            # Foco em exemplos difíceis
+  
+  # Exponential Moving Average
+  use_ema: true                           # Usar EMA para estabilidade
+  ema_decay: 0.9999                       # Taxa de decay do EMA
+
+# Caminhos de saída
+paths:
+  model_dir: "../models"                  # Diretório para salvar modelos
+  log_dir: "../logs/tensorboard"          # Logs do TensorBoard
+
+# Configurações de hardware
+gpu_id: 0                                 # ID da GPU (0 = primeira GPU)
+use_amp: true                             # Mixed precision training (FP16)
+multi_gpu: false                          # Usar múltiplas GPUs (DataParallel)
+
+# Configurações avançadas
+advanced:
+  # Gradient clipping
+  grad_clip_norm: 1.0                     # Clipping de gradientes
+  
+  # Checkpoint settings
+  save_every_n_epochs: 5                  # Salvar checkpoint a cada N épocas
+  keep_last_n_checkpoints: 3              # Manter últimos N checkpoints
+  
+  # Early stopping
+  early_stopping:
+    patience: 15                          # Paciência para early stopping
+    min_delta: 0.001                      # Melhoria mínima considerada
+    monitor: "val_acc"                    # Métrica para monitorar
+  
+  # Data augmentation adicional
+  augmentation:
+    cutmix_prob: 0.3                      # Probabilidade de CutMix
+    mixup_alpha: 0.2                      # Alpha para MixUp
+    auto_augment: true                    # AutoAugment para imagens médicas
+  
+  # Test Time Augmentation
+  tta:
+    enabled: true                         # Usar TTA na validação
+    num_augments: 5                       # Número de augmentações por imagem
+
+# Configuração específica para dados médicos
+medical:
+  # Pesos das classes (ajustar com base no dataset)
+  class_weights:
+    melanoma: 2.0                         # Peso maior para melanoma (crítico)
+    basal_cell_carcinoma: 1.5             # Peso moderado
+    squamous_cell_carcinoma: 1.5          # Peso moderado  
+    actinic_keratosis: 1.2                # Peso leve
+    benign_nevus: 1.0                     # Peso padrão (classe mais comum)
+    dermatofibroma: 1.1                   # Peso leve
+    vascular_lesion: 1.1                  # Peso leve
+  
+  # Métricas específicas para avaliação médica
+  metrics:
+    sensitivity_threshold: 0.9            # Sensibilidade mínima para melanoma
+    specificity_threshold: 0.85           # Especificidade mínima geral
+    
+  # Validação cruzada
+  cross_validation:
+    enabled: false                        # Ativar k-fold CV
+    n_folds: 5                            # Número de folds
+    
+# Logging e monitoramento
+logging:
+  # TensorBoard
+  tensorboard:
+    log_images: true                      # Salvar imagens de exemplo
+    log_histograms: true                  # Histogramas de pesos
+    log_every_n_steps: 100                # Log a cada N steps
+  
+  # Weights & Biases (opcional)
+  wandb:
+    enabled: false                        # Ativar W&B
+    project: "dermai-cancer-detection"    # Nome do projeto
+    tags: ["efficientnet", "medical", "isic"]  # Tags do experimento
+  
+  # Console logging
+  verbose: true                           # Logs verbosos
+  log_level: "INFO"                       # Nível de log
+
+# Reprodutibilidade
+seed: 42                                  # Seed para reprodutibilidade
+
+# Configurações de produção
+production:
+  # Otimizações para inferência
+  optimize_for_inference: true            # Otimizar modelo para produção
+  export_onnx: true                       # Exportar para ONNX
+  quantization: false                     # Quantização do modelo (int8)
+  
+  # Validação rigorosa
+  validation:
+    holdout_test: true                    # Conjunto de teste isolado
+    external_validation: false            # Validação em dataset externo
+    clinical_validation: false            # Validação com especialistas

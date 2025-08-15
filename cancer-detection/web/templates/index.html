@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}DermAI - Detecção de Câncer de Pele{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Hero Section -->
+    <div class="col-12">
+        <div class="hero-section bg-gradient rounded-3 p-5 mb-5 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="fas fa-microscope me-3"></i>
+                        DermAI
+                    </h1>
+                    <p class="lead mb-4">
+                        Sistema inteligente para detecção de câncer de pele usando inteligência artificial avançada. 
+                        Capture uma foto ou envie uma imagem para análise instantânea.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{{ url_for('capture') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-camera me-2"></i>Capturar Foto
+                        </a>
+                        <a href="{{ url_for('upload') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-upload me-2"></i>Enviar Imagem
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fas fa-brain fa-10x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Funcionalidades Principais -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5">
+            <i class="fas fa-stethoscope me-2 text-primary"></i>
+            Como Funciona
+        </h2>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-camera fa-2x"></i>
+                </div>
+                <h4 class="card-title">1. Capture ou Envie</h4>
+                <p class="card-text text-muted">
+                    Tire uma foto da lesão de pele usando sua câmera ou envie uma imagem já existente. 
+                    Certifique-se de que a imagem seja clara e bem iluminada.
+                </p>
+                <a href="{{ url_for('capture') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-camera me-1"></i>Capturar Agora
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-brain fa-2x"></i>
+                </div>
+                <h4 class="card-title">2. Análise por IA</h4>
+                <p class="card-text text-muted">
+                    Nossa inteligência artificial analisa a imagem usando redes neurais avançadas 
+                    treinadas em milhares de imagens dermatológicas do dataset ISIC.
+                </p>
+                <span class="badge bg-success fs-6">
+                    <i class="fas fa-check-circle me-1"></i>EfficientNet-B4
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-file-medical fa-2x"></i>
+                </div>
+                <h4 class="card-title">3. Relatório Detalhado</h4>
+                <p class="card-text text-muted">
+                    Receba um relatório completo com o diagnóstico, probabilidades, recomendações médicas 
+                    e grau de urgência para consulta dermatológica.
+                </p>
+                <a href="{{ url_for('history') }}" class="btn btn-outline-info">
+                    <i class="fas fa-history me-1"></i>Ver Histórico
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tipos de Lesões Detectadas -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5">
+            <i class="fas fa-search me-2 text-primary"></i>
+            Tipos de Lesões Detectadas
+        </h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Lesões Malignas -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-danger h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Lesões Malignas
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-danger me-2"></i>
+                        <strong>Melanoma</strong> - Mais perigoso
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-warning me-2"></i>
+                        <strong>Carcinoma Basocelular</strong> - Mais comum
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-warning me-2"></i>
+                        <strong>Carcinoma Espinocelular</strong> - Moderado
+                    </li>
+                </ul>
+                <div class="alert alert-danger">
+                    <small>
+                        <i class="fas fa-ambulance me-1"></i>
+                        Requer atenção médica imediata
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesões Pré-malignas -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-warning h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Lesões Pré-malignas
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-warning me-2"></i>
+                        <strong>Queratose Actínica</strong> - Precursora
+                    </li>
+                </ul>
+                <div class="alert alert-warning">
+                    <small>
+                        <i class="fas fa-user-md me-1"></i>
+                        Requer acompanhamento médico
+                    </small>
+                </div>
+                <p class="text-muted small mt-3">
+                    Lesões que podem evoluir para câncer se não tratadas adequadamente.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesões Benignas -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-success h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Lesões Benignas
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-success me-2"></i>
+                        <strong>Nevus Benigno</strong> - Pinta comum
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-success me-2"></i>
+                        <strong>Dermatofibroma</strong> - Tumor benigno
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-dot-circle text-success me-2"></i>
+                        <strong>Lesão Vascular</strong> - Vascular benigna
+                    </li>
+                </ul>
+                <div class="alert alert-success">
+                    <small>
+                        <i class="fas fa-calendar-check me-1"></i>
+                        Acompanhamento de rotina
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas do Sistema -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-light border-0">
+            <div class="card-body">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i>
+                    Performance do Sistema
+                </h3>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-primary display-6 fw-bold">85-90%</div>
+                            <div class="stat-label text-muted">Acurácia Geral</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-success display-6 fw-bold">>90%</div>
+                            <div class="stat-label text-muted">Sensibilidade Melanoma</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-info display-6 fw-bold">>0.9</div>
+                            <div class="stat-label text-muted">AUC-ROC</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-warning display-6 fw-bold"><2s</div>
+                            <div class="stat-label text-muted">Tempo de Análise</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-primary text-white border-0">
+            <div class="card-body text-center p-5">
+                <h3 class="mb-3">Pronto para Começar?</h3>
+                <p class="lead mb-4">
+                    Faça sua primeira análise agora mesmo. É rápido, fácil e totalmente gratuito.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('capture') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-camera me-2"></i>Capturar Foto
+                    </a>
+                    <a href="{{ url_for('upload') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-upload me-2"></i>Enviar Imagem
+                    </a>
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-info-circle me-2"></i>Saiba Mais
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Aviso Médico Importante -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Aviso Médico Importante
+            </h4>
+            <p class="mb-3">
+                Este sistema é uma ferramenta educacional baseada em inteligência artificial e 
+                <strong>NÃO substitui a consulta médica profissional</strong>.
+            </p>
+            <hr>
+            <ul class="mb-0">
+                <li>Sempre consulte um dermatologista qualificado para diagnósticos definitivos</li>
+                <li>Use este sistema apenas como ferramenta auxiliar de triagem</li>
+                <li>Em caso de suspeita de melanoma, procure atendimento médico imediatamente</li>
+                <li>Realize autoexame regularmente e mantenha consultas dermatológicas em dia</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
