@@ -1,0 +1,30 @@
+{
+  "limites": {
+    "cpu_percent": 75.0,
+    "memoria_percent": 80.0,
+    "disco_percent": 85.0,
+    "temperatura_cpu": 65.0
+  },
+  "intervalo_monitoramento": 60,
+  "salvar_historico": true,
+  "arquivo_historico": "../logs/historico_sistema.json",
+  "alertas": {
+    "email": {
+      "ativo": false,
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "email_origem": "seu_email@gmail.com",
+      "senha": "sua_senha_app",
+      "email_destino": "admin@empresa.com"
+    },
+    "webhook": {
+      "ativo": false,
+      "url": "https://hooks.slack.com/services/SEU/WEBHOOK/AQUI"
+    }
+  },
+  "processos": {
+    "monitorar_especificos": ["chrome", "firefox", "python", "node"],
+    "limitar_cpu": 90.0,
+    "limitar_memoria": 95.0
+  }
+}

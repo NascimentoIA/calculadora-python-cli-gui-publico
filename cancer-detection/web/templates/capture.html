@@ -1,0 +1,588 @@
+{% extends "base.html" %}
+
+{% block title %}Capturar Foto - DermAI{% endblock %}
+
+{% block extra_head %}
+<style>
+    #video-container {
+        position: relative;
+        max-width: 100%;
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    #video {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    #canvas {
+        display: none;
+    }
+    
+    .camera-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200px;
+        height: 200px;
+        border: 3px solid rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    
+    .captured-image {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .camera-button {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid white;
+        background: #007bff;
+        transition: all 0.3s ease;
+    }
+    
+    .camera-button:hover {
+        background: #0056b3;
+        transform: scale(1.1);
+    }
+    
+    .result-card {
+        border-left: 5px solid #007bff;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4">
+            <i class="fas fa-camera fa-2x text-primary me-3"></i>
+            <div>
+                <h1 class="mb-1">Captura de Foto</h1>
+                <p class="text-muted mb-0">Tire uma foto da lesão de pele para análise</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instruções de Uso -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">
+                <i class="fas fa-lightbulb me-2"></i>
+                Dicas para uma boa foto:
+            </h5>
+            <ul class="mb-0">
+                <li><strong>Iluminação:</strong> Use luz natural ou iluminação bem distribuída</li>
+                <li><strong>Foco:</strong> Mantenha a câmera estável e a lesão em foco</li>
+                <li><strong>Distância:</strong> Mantenha cerca de 10-15cm da lesão</li>
+                <li><strong>Ângulo:</strong> Fotografe perpendicularmente à superfície da pele</li>
+                <li><strong>Contraste:</strong> Use fundo neutro para destacar a lesão</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Área da Câmera -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-video me-2"></i>
+                    Câmera
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <!-- Área do vídeo -->
+                <div id="camera-section">
+                    <div id="video-container" class="position-relative">
+                        <video id="video" autoplay muted playsinline></video>
+                        <div class="camera-overlay"></div>
+                        
+                        <!-- Controles de câmera -->
+                        <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3">
+                            <button id="capture-btn" class="btn camera-button text-white">
+                                <i class="fas fa-camera fa-2x"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Botão para trocar câmera (mobile) -->
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <button id="flip-camera-btn" class="btn btn-sm btn-outline-light rounded-circle" style="display: none;">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Canvas oculto para captura -->
+                    <canvas id="canvas"></canvas>
+                </div>
+                
+                <!-- Área da imagem capturada -->
+                <div id="captured-section" style="display: none;">
+                    <div class="text-center p-4">
+                        <img id="captured-image" class="captured-image mb-3" alt="Imagem capturada">
+                        
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <button id="retake-btn" class="btn btn-outline-secondary">
+                                <i class="fas fa-redo me-2"></i>Tirar Nova Foto
+                            </button>
+                            <button id="analyze-btn" class="btn btn-primary">
+                                <i class="fas fa-brain me-2"></i>Analisar Imagem
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estado sem câmera -->
+                <div id="no-camera-section" style="display: none;">
+                    <div class="text-center p-5">
+                        <i class="fas fa-video-slash fa-4x text-muted mb-3"></i>
+                        <h5>Câmera não disponível</h5>
+                        <p class="text-muted mb-3">
+                            Não foi possível acessar sua câmera. Verifique as permissões do navegador.
+                        </p>
+                        <button id="retry-camera-btn" class="btn btn-primary me-2">
+                            <i class="fas fa-refresh me-2"></i>Tentar Novamente
+                        </button>
+                        <a href="{{ url_for('upload') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-upload me-2"></i>Enviar Arquivo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel de Informações -->
+    <div class="col-lg-4 mb-4">
+        <!-- Status da análise -->
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="status-ready" class="status-item">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>Pronto para capturar</span>
+                </div>
+                <div id="status-captured" class="status-item" style="display: none;">
+                    <i class="fas fa-image text-info me-2"></i>
+                    <span>Imagem capturada</span>
+                </div>
+                <div id="status-analyzing" class="status-item" style="display: none;">
+                    <i class="fas fa-spinner fa-spin text-warning me-2"></i>
+                    <span>Analisando...</span>
+                </div>
+                <div id="status-complete" class="status-item" style="display: none;">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>Análise concluída</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dicas técnicas -->
+        <div class="card mb-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-camera me-2"></i>
+                    Configurações da Câmera
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <label for="resolution-select" class="form-label small">Resolução:</label>
+                    <select id="resolution-select" class="form-select form-select-sm">
+                        <option value="1280x720">HD (1280x720)</option>
+                        <option value="1920x1080" selected>Full HD (1920x1080)</option>
+                        <option value="3840x2160">4K (3840x2160)</option>
+                    </select>
+                </div>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="auto-focus" checked>
+                    <label class="form-check-label small" for="auto-focus">
+                        Auto foco
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ajuda -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Precisa de Ajuda?
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="small mb-2">
+                    <strong>Problema com a câmera?</strong><br>
+                    Certifique-se de que você permitiu o acesso à câmera no seu navegador.
+                </p>
+                <p class="small mb-2">
+                    <strong>Foto borrada?</strong><br>
+                    Aguarde o foco automático estabilizar antes de capturar.
+                </p>
+                <p class="small mb-0">
+                    <strong>Preferiu enviar arquivo?</strong><br>
+                    <a href="{{ url_for('upload') }}" class="text-decoration-none">
+                        Clique aqui para upload
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resultado da Análise -->
+<div id="result-section" class="row mt-4" style="display: none;">
+    <div class="col-12">
+        <div class="card result-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-microscope me-2"></i>
+                    Resultado da Análise
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="result-content">
+                    <!-- Conteúdo será preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+class CameraCapture {
+    constructor() {
+        this.video = document.getElementById('video');
+        this.canvas = document.getElementById('canvas');
+        this.capturedImage = document.getElementById('captured-image');
+        this.stream = null;
+        this.currentFacingMode = 'environment'; // Câmera traseira por padrão
+        this.constraints = {
+            video: {
+                facingMode: this.currentFacingMode,
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            }
+        };
+        
+        this.initializeCamera();
+        this.setupEventListeners();
+    }
+    
+    async initializeCamera() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia(this.constraints);
+            this.video.srcObject = this.stream;
+            
+            // Detectar se é mobile para mostrar botão de flip
+            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                document.getElementById('flip-camera-btn').style.display = 'block';
+            }
+            
+            this.updateStatus('ready');
+        } catch (error) {
+            console.error('Erro ao acessar câmera:', error);
+            this.showNoCameraSection();
+        }
+    }
+    
+    setupEventListeners() {
+        // Capturar foto
+        document.getElementById('capture-btn').addEventListener('click', () => {
+            this.capturePhoto();
+        });
+        
+        // Trocar câmera
+        document.getElementById('flip-camera-btn').addEventListener('click', () => {
+            this.flipCamera();
+        });
+        
+        // Tirar nova foto
+        document.getElementById('retake-btn').addEventListener('click', () => {
+            this.retakePhoto();
+        });
+        
+        // Analisar imagem
+        document.getElementById('analyze-btn').addEventListener('click', () => {
+            this.analyzeImage();
+        });
+        
+        // Tentar câmera novamente
+        document.getElementById('retry-camera-btn').addEventListener('click', () => {
+            this.initializeCamera();
+        });
+        
+        // Mudança de resolução
+        document.getElementById('resolution-select').addEventListener('change', (e) => {
+            const resolution = e.target.value.split('x');
+            this.constraints.video.width = { ideal: parseInt(resolution[0]) };
+            this.constraints.video.height = { ideal: parseInt(resolution[1]) };
+            this.restartCamera();
+        });
+    }
+    
+    capturePhoto() {
+        const context = this.canvas.getContext('2d');
+        
+        // Definir tamanho do canvas
+        this.canvas.width = this.video.videoWidth;
+        this.canvas.height = this.video.videoHeight;
+        
+        // Desenhar frame do vídeo no canvas
+        context.drawImage(this.video, 0, 0);
+        
+        // Converter para imagem
+        const imageDataURL = this.canvas.toDataURL('image/jpeg', 0.9);
+        
+        // Mostrar imagem capturada
+        this.capturedImage.src = imageDataURL;
+        this.showCapturedSection();
+        this.updateStatus('captured');
+        
+        // Parar stream da câmera
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+        }
+    }
+    
+    async flipCamera() {
+        this.currentFacingMode = this.currentFacingMode === 'environment' ? 'user' : 'environment';
+        this.constraints.video.facingMode = this.currentFacingMode;
+        await this.restartCamera();
+    }
+    
+    async restartCamera() {
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+        }
+        await this.initializeCamera();
+    }
+    
+    retakePhoto() {
+        this.showCameraSection();
+        this.initializeCamera();
+        this.updateStatus('ready');
+        document.getElementById('result-section').style.display = 'none';
+    }
+    
+    async analyzeImage() {
+        this.updateStatus('analyzing');
+        
+        // Mostrar modal de loading
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        loadingModal.show();
+        
+        try {
+            // Converter imagem para base64
+            const imageDataURL = this.capturedImage.src;
+            
+            // Enviar para API
+            const response = await fetch('/api/capture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: imageDataURL
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                this.displayResult(result);
+                this.updateStatus('complete');
+            } else {
+                this.displayError(result.error || 'Erro na análise');
+            }
+        } catch (error) {
+            console.error('Erro na análise:', error);
+            this.displayError('Erro de comunicação com o servidor');
+        } finally {
+            loadingModal.hide();
+        }
+    }
+    
+    displayResult(result) {
+        const resultContent = document.getElementById('result-content');
+        const classInfo = result.class_info;
+        const medicalRec = result.medical_recommendation;
+        
+        // Determinar cor baseada na urgência
+        const urgencyColors = {
+            'URGENTE': 'danger',
+            'Alta': 'warning',
+            'Moderada': 'info',
+            'Baixa': 'success'
+        };
+        
+        const urgencyColor = urgencyColors[medicalRec.urgency] || 'secondary';
+        
+        resultContent.innerHTML = `
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="mb-3">
+                        <i class="fas fa-microscope me-2 text-primary"></i>
+                        Diagnóstico: ${result.predicted_class}
+                    </h4>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <div class="card border-${urgencyColor}">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Confiança</h6>
+                                    <div class="display-6 text-${urgencyColor}">${(result.confidence * 100).toFixed(1)}%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card border-${urgencyColor}">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Urgência</h6>
+                                    <span class="badge bg-${urgencyColor} fs-6">${medicalRec.urgency}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-${urgencyColor}" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-user-md me-2"></i>
+                            Recomendação Médica
+                        </h6>
+                        <p class="mb-0">${medicalRec.recommendation}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Informações da Lesão:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Tipo:</strong> ${classInfo.type}</li>
+                            <li><strong>Severidade:</strong> ${classInfo.severity}</li>
+                            <li><strong>Descrição:</strong> ${classInfo.description}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <h6 class="mb-3">Probabilidades Detalhadas:</h6>
+                    ${this.generateProbabilityBars(result.all_probabilities)}
+                    
+                    <div class="mt-3">
+                        <a href="/result/${result.result_id}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-file-alt me-2"></i>Ver Relatório Completo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('result-section').style.display = 'block';
+        
+        // Scroll para o resultado
+        document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    generateProbabilityBars(probabilities) {
+        const sorted = Object.entries(probabilities)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5); // Top 5
+        
+        return sorted.map(([className, prob]) => {
+            const percentage = (prob * 100).toFixed(1);
+            const width = Math.max(prob * 100, 5); // Mínimo 5% para visibilidade
+            
+            return `
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-muted">${className}</small>
+                        <small class="fw-bold">${percentage}%</small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" style="width: ${width}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    displayError(errorMessage) {
+        const resultContent = document.getElementById('result-content');
+        resultContent.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro na Análise
+                </h5>
+                <p class="mb-0">${errorMessage}</p>
+            </div>
+        `;
+        
+        document.getElementById('result-section').style.display = 'block';
+    }
+    
+    showCameraSection() {
+        document.getElementById('camera-section').style.display = 'block';
+        document.getElementById('captured-section').style.display = 'none';
+        document.getElementById('no-camera-section').style.display = 'none';
+    }
+    
+    showCapturedSection() {
+        document.getElementById('camera-section').style.display = 'none';
+        document.getElementById('captured-section').style.display = 'block';
+    }
+    
+    showNoCameraSection() {
+        document.getElementById('camera-section').style.display = 'none';
+        document.getElementById('captured-section').style.display = 'none';
+        document.getElementById('no-camera-section').style.display = 'block';
+    }
+    
+    updateStatus(status) {
+        // Esconder todos os status
+        document.querySelectorAll('.status-item').forEach(item => {
+            item.style.display = 'none';
+        });
+        
+        // Mostrar status atual
+        const statusElement = document.getElementById(`status-${status}`);
+        if (statusElement) {
+            statusElement.style.display = 'block';
+        }
+    }
+}
+
+// Inicializar quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    new CameraCapture();
+});
+</script>
+{% endblock %}

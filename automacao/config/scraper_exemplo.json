@@ -1,0 +1,43 @@
+{
+  "delay_requisicoes": 2,
+  "timeout": 45,
+  "max_retries": 5,
+  "salvar_html": true,
+  "diretorio_html": "../logs/html_pages",
+  "formato_saida": "both",
+  "arquivo_saida": "../logs/dados_coletados",
+  "sites": [
+    {
+      "url": "https://news.ycombinator.com",
+      "tipo": "noticias",
+      "nome": "Hacker News",
+      "seletores": {
+        "titulo": ".titleline > a",
+        "pontos": ".score",
+        "comentarios": ".subtext a:last-child",
+        "autor": ".hnuser"
+      }
+    },
+    {
+      "url": "https://github.com/trending",
+      "tipo": "generico",
+      "nome": "GitHub Trending",
+      "seletores": {
+        "repositorio": "h2.h3 a",
+        "descricao": "p.col-9",
+        "linguagem": "[itemprop='programmingLanguage']",
+        "estrelas": ".octicon-star"
+      }
+    }
+  ],
+  "headers_personalizados": {
+    "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br",
+    "DNT": "1"
+  },
+  "proxy": {
+    "ativo": false,
+    "http": "http://proxy.exemplo.com:8080",
+    "https": "https://proxy.exemplo.com:8080"
+  }
+}
